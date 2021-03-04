@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "299734298515",
+    "project_id": "freindlychatapp-b46e1",
+    "storage_bucket": "freindlychatapp-b46e1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:299734298515:android:064eb1a0f9955034c60266",
+        "android_client_info": {
+          "package_name": "com.example.freindschatapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "299734298515-rmmc3k7ihmockpsr64k1slj4mjeo25th.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDR9NCelGsEQOzv5BplGoVGuK9m9v1Adso"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "299734298515-rmmc3k7ihmockpsr64k1slj4mjeo25th.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
