@@ -218,10 +218,16 @@ public class MainActivity extends AppCompatActivity {
                                     public void onSuccess(Uri uri) {
                                         String imageUrl = uri.toString();
                                         //createNewPost(imageUrl);
+
+                                        FriendlyMessage friendlyMessage = new FriendlyMessage(null, mUsername, imageUrl.toString());
+                                        mMessageDatabaseReference.push().setValue(friendlyMessage);
+
                                     }
                                 });
                             }
                         }//extract Uri of image using Task (new class)
+
+
 
 
 
