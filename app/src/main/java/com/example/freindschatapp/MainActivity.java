@@ -131,10 +131,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        attatchDatabaseReadListener();
 
 
-        mMessageDatabaseReference.addChildEventListener(mChildEventListener);
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -199,6 +197,8 @@ public class MainActivity extends AppCompatActivity {
         if (mAuthStateListener != null) {
             mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
         }
+        mMessageAdapter.clear();
+        detachDatabaseReadListener();
     }
 
     @Override
@@ -255,6 +255,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
+        mMessageDatabaseReference.addChildEventListener(mChildEventListener);
     }
 
     private void detachDatabaseReadListener() {
