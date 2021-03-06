@@ -130,6 +130,72 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        attatchDatabaseReadListener();
+
+
+        mMessageDatabaseReference.addChildEventListener(mChildEventListener);
+        mAuthStateListener = new FirebaseAuth.AuthStateListener(){
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if(user!=null){
+
+                    OnSignedInInitialise(user.getDisplayName());
+
+                } else{
+
+                    //user is signed out
+                    // Choose authentication providers
+                    List<AuthUI.IdpConfig> providers = Arrays.asList(
+                            new AuthUI.IdpConfig.EmailBuilder().build(),
+                            new AuthUI.IdpConfig.GoogleBuilder().build());
+
+                    // Create and launch sign-in intent
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setAvailableProviders(providers)
+                                    .build(),
+                            RC_SIGN_IN);
+
+                }
+                }
+            };
+        }
+
+
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mFirebaseAuth.addAuthStateListener(mAuthStateListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mAuthStateListener !=null){
+            mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    private void attatchDatabaseReadListener() {
+
         mChildEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -157,41 +223,26 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-        mMessageDatabaseReference.addChildEventListener(mChildEventListener);
-        mAuthStateListener = new FirebaseAuth.AuthStateListener(){
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if(user!=null){
-                    Toast.makeText(MainActivity.this, "You're now signed in. Welcome to FriendlyChat.", Toast.LENGTH_SHORT).show();
-                } else{
-                    //user is signed out
-                    // Choose authentication providers
-                    List<AuthUI.IdpConfig> providers = Arrays.asList(
-                            new AuthUI.IdpConfig.EmailBuilder().build(),
-                            new AuthUI.IdpConfig.GoogleBuilder().build());
+    }
 
-                    // Create and launch sign-in intent
-                    startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setAvailableProviders(providers)
-                                    .build(),
-                            RC_SIGN_IN);
-                }
-                }
-            };
+    private void detachDatabaseReadListener() {
+        if(mChildEventListener != null){
+            mMessageDatabaseReference.removeEventListener(mChildEventListener);
+            mChildEventListener= null;
         }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu,menu);
-        return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        return super.onOptionsItemSelected(item);
+    private  void OnSignedInInitialise(String username){
+        mUsername = username;
+        attatchDatabaseReadListener();
     }
+
+    private void OnSignedOutCleanup(){
+        mUsername = ANONYMOUS;
+        mMessageAdapter.clear();
+        detachDatabaseReadListener();
+    }
+
+
+
 }
