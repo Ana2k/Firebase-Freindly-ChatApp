@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.text.Editable;
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         mUsername = ANONYMOUS;
 
         mFirebaseDatabasse = FirebaseDatabase.getInstance();
-        mFirebaseAuth=FirebaseAuth.getInstance();
+        mFirebaseAuth = FirebaseAuth.getInstance();
 
         mMessageDatabaseReference = mFirebaseDatabasse.getReference().child("message");
 
@@ -134,17 +135,20 @@ public class MainActivity extends AppCompatActivity {
 
 
         mMessageDatabaseReference.addChildEventListener(mChildEventListener);
-        mAuthStateListener = new FirebaseAuth.AuthStateListener(){
+        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                if(user!=null){
+                if (user != null) {
 
                     OnSignedInInitialise(user.getDisplayName());
 
-                } else{
+                } else {
 
                     //user is signed out
+
+                    OnSignedOutCleanup();
+
                     // Choose authentication providers
                     List<AuthUI.IdpConfig> providers = Arrays.asList(
                             new AuthUI.IdpConfig.EmailBuilder().build(),
@@ -159,12 +163,28 @@ public class MainActivity extends AppCompatActivity {
                             RC_SIGN_IN);
 
                 }
-                }
-            };
+            }
+        };
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "Signed In.", Toast.LENGTH_SHORT).show();
+            } else if (resultCode == RESULT_CANCELED) {
+
+                Toast.makeText(this, "Signed In Cancelled.", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+
         }
 
-
-
+    }
 
     @Override
     protected void onResume() {
@@ -176,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if(mAuthStateListener !=null){
+        if (mAuthStateListener != null) {
             mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
         }
     }
@@ -184,12 +204,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu,menu);
+        inflater.inflate(R.menu.main_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        switch (item.getItemId()){
+
+            case R.id.sign_out_menu:
+                AuthUI.getInstance().signOut(this);
+                return true;
+
+            default:
+                super.onOptionsItemSelected(item);
+
+        }
+        
         return super.onOptionsItemSelected(item);
     }
 
@@ -226,23 +258,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void detachDatabaseReadListener() {
-        if(mChildEventListener != null){
+        if (mChildEventListener != null) {
             mMessageDatabaseReference.removeEventListener(mChildEventListener);
-            mChildEventListener= null;
+            mChildEventListener = null;
         }
     }
 
-    private  void OnSignedInInitialise(String username){
+    private void OnSignedInInitialise(String username) {
         mUsername = username;
         attatchDatabaseReadListener();
     }
 
-    private void OnSignedOutCleanup(){
+    private void OnSignedOutCleanup() {
         mUsername = ANONYMOUS;
         mMessageAdapter.clear();
         detachDatabaseReadListener();
     }
-
 
 
 }
